@@ -1,0 +1,514 @@
+<html lang="en" class="scroll-smooth"><head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>For Satish | My Forever</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+    <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;600&amp;family=Inter:wght@200;300;400;500&amp;family=Playfair+Display:ital,wght@0,400;0,500;1,400&amp;display=swap" rel="stylesheet">
+
+    <style>
+        /* Custom Animations & Base Styles */
+        :root {
+            --font-sans: 'Inter', sans-serif;
+            --font-serif: 'Playfair Display', serif;
+            --font-hand: 'Caveat', cursive;
+        }
+
+        body {
+            font-family: var(--font-sans);
+        }
+
+        .font-serif { font-family: var(--font-serif); }
+        .font-hand { font-family: var(--font-hand); }
+
+        /* Floating Background Hearts */
+        .floating-heart {
+            position: fixed;
+            color: rgba(244, 63, 94, 0.1);
+            animation: floatUp linear infinite;
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        @keyframes floatUp {
+            0% { transform: translateY(100vh) scale(0.5); opacity: 0; }
+            20% { opacity: 0.6; }
+            80% { opacity: 0.6; }
+            100% { transform: translateY(-10vh) scale(1.2); opacity: 0; }
+        }
+
+        /* Typing Cursor */
+        .typing-cursor::after {
+            content: '|';
+            animation: blink 1s step-start infinite;
+        }
+
+        @keyframes blink {
+            50% { opacity: 0; }
+        }
+
+        /* Glassmorphism Utilities */
+        .glass {
+            background: rgba(255, 255, 255, 0.4);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.6);
+        }
+
+        .glass-dark {
+            background: rgba(255, 241, 242, 0.8);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 204, 213, 0.5);
+        }
+
+        /* Scroll Hide */
+        ::-webkit-scrollbar {
+            width: 0px;
+            background: transparent;
+        }
+
+        /* Photo Card Hover */
+        .photo-card {
+            transition: transform 0.6s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+        .photo-card:hover {
+            transform: translateY(-8px) rotate(0deg) scale(1.02);
+            z-index: 10;
+        }
+        
+        /* Heart Explosion Particles */
+        .particle {
+            position: absolute;
+            pointer-events: none;
+            animation: shoot 1s ease-out forwards;
+        }
+        
+        @keyframes shoot {
+            0% { transform: translate(0, 0) scale(1); opacity: 1; }
+            100% { transform: translate(var(--x), var(--y)) scale(0); opacity: 0; }
+        }
+    </style>
+</head>
+<body class="bg-rose-50 text-stone-800 antialiased relative overflow-x-hidden selection:bg-rose-200 selection:text-rose-900">
+
+    <!-- Background Elements -->
+    <div id="heart-container" class="fixed inset-0 pointer-events-none overflow-hidden"></div>
+    
+    <!-- Audio Element (Hidden) -->
+    <audio id="bg-music" loop="">
+        <!-- Using a royalty free sound placeholder -->
+        <source src="https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3?filename=romantic-piano-111666.mp3" type="audio/mpeg">
+    </audio>
+
+    <!-- Password Overlay -->
+    <div id="auth-overlay" class="fixed inset-0 z-50 flex items-center justify-center bg-rose-50/90 backdrop-blur-xl transition-all duration-1000">
+        <div class="text-center max-w-sm px-6 w-full">
+            <iconify-icon icon="solar:lock-keyhole-minimalistic-linear" class="text-rose-400 text-4xl mb-4"></iconify-icon>
+            <h2 class="font-serif text-2xl text-rose-900 mb-2 tracking-tight">Protected Heart</h2>
+            <p class="text-stone-500 text-sm mb-6 font-light">Enter the password to access our world.</p>
+            <div class="relative group">
+                <input type="password" id="password-input" placeholder="Hint: Our favorite number" class="w-full bg-white/50 border border-rose-200 rounded-lg py-3 px-4 text-center focus:outline-none focus:border-rose-400 focus:ring-1 focus:ring-rose-200 transition-all font-light placeholder:text-stone-300">
+            </div>
+            <button onclick="checkPassword()" class="mt-4 w-full bg-rose-900 hover:bg-rose-800 text-white font-medium py-3 rounded-lg transition-all duration-300 shadow-lg shadow-rose-900/10 text-sm tracking-wide">
+                Unlock
+            </button>
+            <p id="error-msg" class="text-rose-500 text-xs mt-3 hidden opacity-0 transition-opacity">Incorrect password, my love.</p>
+            
+            <div class="mt-8">
+                <p class="text-[10px] text-stone-400 uppercase tracking-widest">Or for demo purposes</p>
+                <button onclick="bypassAuth()" class="text-xs text-rose-400 underline mt-1 hover:text-rose-600">Just Enter</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sticky Music Control -->
+    <div class="fixed bottom-6 right-6 z-40">
+        <button onclick="toggleMusic()" id="music-btn" class="glass w-12 h-12 rounded-full flex items-center justify-center text-rose-800 shadow-sm hover:scale-105 transition-transform">
+            <iconify-icon icon="solar:music-note-slider-linear" class="text-xl"></iconify-icon>
+        </button>
+    </div>
+
+    <!-- Hero Section -->
+    <section class="min-h-screen flex flex-col items-center justify-center relative px-6 text-center">
+        <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-rose-100/50 via-transparent to-transparent opacity-70"></div>
+        
+        <div class="relative z-10 animate-[fadeIn_1.5s_ease-out]">
+            <div class="mb-6 inline-flex items-center justify-center w-16 h-16 rounded-full bg-white shadow-lg shadow-rose-100 text-rose-500">
+                <iconify-icon icon="solar:heart-angle-linear" class="text-3xl animate-pulse"></iconify-icon>
+            </div>
+            <h1 class="font-serif text-5xl md:text-7xl lg:text-8xl text-rose-950 mb-6 tracking-tight leading-[1.1]">
+                To My Forever,<br><span class="text-rose-500 italic font-serif">Satish</span>
+            </h1>
+            <p class="text-stone-600 text-lg md:text-xl font-light tracking-wide max-w-lg mx-auto mb-10 leading-relaxed">
+                Every love story is beautiful, but ours is my favorite.
+            </p>
+            <button onclick="scrollToSection('gallery')" class="group relative px-8 py-3 bg-white border border-rose-100 text-rose-900 rounded-full shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden">
+                <span class="relative z-10 flex items-center gap-2 text-sm font-medium tracking-wide">
+                    Click to Open My Heart
+                    <iconify-icon icon="solar:arrow-down-linear" class="group-hover:translate-y-1 transition-transform"></iconify-icon>
+                </span>
+                <div class="absolute inset-0 bg-rose-50 transform scale-x-0 group-hover:scale-x-100 transition-transform origin-left duration-500"></div>
+            </button>
+        </div>
+    </section>
+
+    <!-- Photo Gallery Section -->
+    <section id="gallery" class="py-24 px-6 md:px-12 max-w-7xl mx-auto relative">
+        <div class="text-center mb-16">
+            <span class="text-rose-400 text-xs font-semibold tracking-[0.2em] uppercase">Memories</span>
+            <h2 class="font-serif text-3xl md:text-5xl text-rose-950 mt-3 tracking-tight">Us, Frozen in Time</h2>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-12">
+            <!-- Photo 1 -->
+            <div class="group photo-card relative bg-white p-3 md:p-4 rounded-sm shadow-md shadow-rose-900/5 rotate-[-2deg]">
+                <div class="relative aspect-[4/5] overflow-hidden bg-rose-100 grayscale-[20%] group-hover:grayscale-0 transition-all duration-500">
+                    <img src="./sharada.meet.html.jpeg" alt="Us" class="w-full h-full object-cover">
+                    <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                        <p class="text-white font-hand text-2xl md:text-3xl transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300">Our first smile together</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Photo 2 -->
+            <div class="group photo-card relative bg-white p-3 md:p-4 rounded-sm shadow-md shadow-rose-900/5 rotate-[3deg] md:mt-12">
+                <div class="relative aspect-[4/5] overflow-hidden bg-rose-100 grayscale-[20%] group-hover:grayscale-0 transition-all duration-500">
+                    <img src="./shaa2.jpg.jpeg" alt="Us" class="w-full h-full object-cover">
+                    <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                        <p class="text-white font-hand text-2xl md:text-3xl transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300">My safe place</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Photo 3 -->
+            <div class="group photo-card relative bg-white p-3 md:p-4 rounded-sm shadow-md shadow-rose-900/5 rotate-[-1deg]">
+                <div class="relative aspect-[4/5] overflow-hidden bg-rose-100 grayscale-[20%] group-hover:grayscale-0 transition-all duration-500">
+                    <img src="./shari.jpeg" alt="Us" class="w-full h-full object-cover">
+                    <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                        <p class="text-white font-hand text-2xl md:text-3xl transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300">Forever starts here</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="mt-12 text-center">
+            <label class="cursor-pointer inline-flex items-center gap-2 text-stone-500 hover:text-rose-600 transition-colors text-sm font-medium border-b border-transparent hover:border-rose-200 pb-0.5">
+                <iconify-icon icon="solar:camera-add-linear"></iconify-icon>
+                Upload more memories
+                <input type="file" class="hidden" multiple="" accept="image/*">
+            </label>
+        </div>
+    </section>
+
+    <!-- Memory Timeline Section -->
+    <section class="py-24 px-6 md:px-12 bg-white relative">
+        <div class="max-w-3xl mx-auto">
+            <div class="text-center mb-16">
+                <h2 class="font-serif text-3xl md:text-4xl text-rose-950 tracking-tight">Our Journey</h2>
+            </div>
+
+            <div class="relative border-l border-rose-100 ml-6 md:ml-12 space-y-16">
+                <!-- Timeline Item -->
+                <div class="relative pl-12 group">
+                    <div class="absolute -left-[9px] top-1 w-5 h-5 bg-white border border-rose-200 rounded-full flex items-center justify-center group-hover:scale-125 group-hover:border-rose-400 transition-all duration-300">
+                        <div class="w-2 h-2 bg-rose-400 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                    </div>
+                    <div class="flex flex-col md:flex-row md:items-center gap-2 md:gap-6">
+                        <span class="text-xs font-semibold tracking-wider text-rose-300 uppercase">Start</span>
+                    <h3 class="text-xl font-serif text-stone-800">First Chat</h3>
+                    </div>
+                    <p class="text-stone-500 font-light mt-2 text-sm leading-relaxed max-w-md">The simple "Hello" that changed my life forever. I never knew a notification could make my heart race.</p>
+                </div>
+                <div class="mt-4">
+    <div class="relative inline-block group cursor-pointer">
+        <div class="rounded-xl border-4 border-white shadow-lg shadow-rose-100 overflow-hidden max-w-[250px] transition-transform duration-300 hover:scale-105 hover:rotate-2">
+            <img src="./frist chat.jpeg" class="w-full h-auto object-cover">
+        </div>
+    </div>
+</div>
+
+                <!-- Timeline Item -->
+                <div class="relative pl-12 group">
+                    <div class="absolute -left-[9px] top-1 w-5 h-5 bg-white border border-rose-200 rounded-full flex items-center justify-center group-hover:scale-125 group-hover:border-rose-400 transition-all duration-300">
+                         <div class="w-2 h-2 bg-rose-400 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                    </div>
+                    <div class="flex flex-col md:flex-row md:items-center gap-2 md:gap-6">
+                        <span class="text-xs font-semibold tracking-wider text-rose-300 uppercase">Connection</span>
+                        <h3 class="text-xl font-serif text-stone-800">First Call</h3>
+                    </div>
+                    <p class="text-stone-500 font-light mt-2 text-sm leading-relaxed max-w-md">Hearing your voice for the first time felt like listening to a favorite song I hadn't heard yet.</p>
+                </div>
+                <div class="mt-4">
+    <div class="relative inline-block group cursor-pointer">
+        <div class="rounded-xl border-4 border-white shadow-lg shadow-rose-100 overflow-hidden max-w-[250px] transition-transform duration-300 hover:scale-105 hover:-rotate-2">
+            <img src="./frist call.jpeg" class="w-full h-auto object-cover">
+        </div>
+    </div>
+</div>
+
+                <!-- Timeline Item -->
+                <div class="relative pl-12 group">
+                    <div class="absolute -left-[9px] top-1 w-5 h-5 bg-white border border-rose-200 rounded-full flex items-center justify-center group-hover:scale-125 group-hover:border-rose-400 transition-all duration-300">
+                         <div class="w-2 h-2 bg-rose-400 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                    </div>
+                    <div class="flex flex-col md:flex-row md:items-center gap-2 md:gap-6">
+                        <span class="text-xs font-semibold tracking-wider text-rose-300 uppercase">Magic</span>
+                        <h3 class="text-xl font-serif text-stone-800">First Date</h3>
+                    </div>
+                    <p class="text-stone-500 font-light mt-2 text-sm leading-relaxed max-w-md">I was so nervous, but the moment I saw you, the world just stopped. Best day ever.</p>
+                </div>
+            </div>
+            <div class="mt-4">
+    <div class="relative inline-block group cursor-pointer">
+        <div class="rounded-xl border-4 border-white shadow-lg shadow-rose-100 overflow-hidden max-w-[250px] transition-transform duration-300 hover:scale-105 hover:rotate-2">
+             <img src="./frist date.jpeg" class="w-full h-auto object-cover">
+        </div>
+    </div>
+</div>
+            
+            <div class="text-center mt-12">
+                 <iconify-icon icon="solar:infinity-linear" class="text-rose-200 text-3xl"></iconify-icon>
+            </div>
+        </div>
+    </section>
+
+    <!-- Love Letter Section -->
+    <section class="py-24 px-6 md:px-12 relative overflow-hidden">
+        <div class="max-w-2xl mx-auto bg-[#fffcf8] p-8 md:p-12 shadow-[0_20px_50px_rgba(225,29,72,0.05)] border border-stone-100 rounded-sm relative">
+            <!-- Paper Texture Effect -->
+            <div class="absolute inset-0 opacity-40 bg-[url('https://www.transparenttextures.com/patterns/cream-paper.png')] pointer-events-none"></div>
+            
+            <div class="relative z-10">
+                <div class="flex justify-between items-center mb-8 border-b border-stone-100 pb-4">
+                    <span class="text-stone-400 text-xs font-sans tracking-widest uppercase">To Satish</span>
+                    <iconify-icon icon="solar:heart-bold" class="text-rose-400 text-xl"></iconify-icon>
+                </div>
+                
+                <div class="font-hand text-2xl md:text-3xl text-stone-800 leading-loose md:leading-loose min-h-[300px]">
+                    <span id="typewriter-text"></span><span class="typing-cursor text-rose-400"></span>
+                </div>
+
+                <div class="mt-8 pt-6 border-t border-stone-100 flex justify-end">
+                    <span class="font-hand text-xl text-stone-600">With all my love,<br>sharada</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Special Surprise Section -->
+    <section class="py-32 px-6 text-center relative">
+        <div class="absolute inset-0 bg-gradient-to-b from-transparent to-rose-100/30 -z-10"></div>
+        <button onclick="toggleModal()" class="group relative inline-flex items-center justify-center gap-3 bg-rose-900 text-rose-50 px-10 py-5 rounded-full shadow-xl shadow-rose-900/20 hover:shadow-2xl hover:shadow-rose-900/30 hover:-translate-y-1 transition-all duration-500">
+            <span class="text-lg font-medium tracking-wide">Tap for a Surprise</span>
+            <iconify-icon icon="solar:letter-heart-linear" class="text-2xl group-hover:scale-110 transition-transform"></iconify-icon>
+        </button>
+    </section>
+
+    <!-- Footer -->
+    <footer class="py-12 text-center border-t border-rose-100 bg-white">
+        <p class="text-stone-500 font-light text-sm flex items-center justify-center gap-2">
+            Made with endless love by <span class="font-medium text-rose-800">sharada</span> 
+            <iconify-icon icon="solar:heart-bold" class="text-rose-500 text-xs"></iconify-icon>
+        </p>
+        <div class="mt-3 text-stone-300 text-xs tracking-widest uppercase flex items-center justify-center gap-2">
+            <span>Feb 14, 2024</span>
+            <span>•</span>
+            <iconify-icon icon="solar:infinity-linear" class="text-sm"></iconify-icon>
+        </div>
+    </footer>
+
+    <!-- Modal -->
+    <div id="surprise-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4">
+        <!-- Backdrop -->
+        <div class="absolute inset-0 bg-stone-900/40 backdrop-blur-sm transition-opacity" onclick="toggleModal()"></div>
+        
+        <!-- Modal Content -->
+        <div class="relative glass-dark p-8 md:p-12 rounded-2xl max-w-md w-full text-center transform scale-95 transition-all duration-300 shadow-2xl animate-[fadeIn_0.5s_ease-out]">
+            <div class="mb-6">
+                <iconify-icon icon="solar:heart-shine-linear" class="text-6xl text-rose-500 drop-shadow-sm"></iconify-icon>
+            </div>
+            <h3 class="font-serif text-3xl md:text-4xl text-rose-950 mb-4 leading-tight">Satish...</h3>
+            <p class="text-stone-700 text-lg mb-8 font-light">Will you be my Valentine, today and forever? ❤️</p>
+            
+            <div class="flex flex-col gap-3">
+                <button onclick="acceptLove()" class="w-full bg-rose-500 hover:bg-rose-600 text-white py-4 rounded-xl font-medium tracking-wide shadow-lg shadow-rose-500/30 transition-all hover:scale-[1.02]">
+                    YES, Forever!
+                </button>
+                <button onclick="toggleModal()" class="w-full bg-transparent text-stone-400 py-2 text-xs hover:text-rose-500 transition-colors">
+                    Close (But the answer is still yes)
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Celebration Overlay -->
+    <div id="celebration-overlay" class="fixed inset-0 z-[60] pointer-events-none flex items-center justify-center hidden">
+        <h1 class="font-serif text-5xl md:text-8xl text-rose-600 drop-shadow-2xl animate-bounce">I Love You!</h1>
+    </div>
+
+    <script>
+        // --- Configuration ---
+        const loveLetterText = "Satish, from the moment our paths crossed, my world became brighter. You are the reason behind my smiles and the calm in my chaos. Thank you for being my rock, my best friend, and my greatest adventure. I love you more than words can say.";
+        
+        // --- UI Interactions ---
+        
+        function scrollToSection(id) {
+            document.getElementById(id).scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // --- Password Logic ---
+        function checkPassword() {
+            const input = document.getElementById('password-input').value;
+            // Simple check (In a real app, use backend)
+            // Accepts 'Satish' or '143' or generic 'password'
+            if (input.toLowerCase() === '14/09/2025') {
+                unlockSite();
+            } else {
+                const err = document.getElementById('error-msg');
+                err.classList.remove('hidden');
+                setTimeout(() => err.classList.remove('opacity-0'), 10);
+            }
+        }
+
+        function bypassAuth() {
+            unlockSite();
+        }
+
+        function unlockSite() {
+            const overlay = document.getElementById('auth-overlay');
+            overlay.classList.add('opacity-0', 'pointer-events-none');
+            setTimeout(() => {
+                overlay.style.display = 'none';
+                playMusic(); // Try to autoplay after interaction
+                initTypewriter(); // Start observing for typewriter
+            }, 1000);
+        }
+
+        // --- Music Logic ---
+        const audio = document.getElementById('bg-music');
+        let isPlaying = false;
+
+        function playMusic() {
+            audio.volume = 0.4;
+            audio.play().then(() => {
+                isPlaying = true;
+                updateMusicIcon();
+            }).catch(e => console.log("Autoplay prevented"));
+        }
+
+        function toggleMusic() {
+            if (isPlaying) {
+                audio.pause();
+            } else {
+                audio.play();
+            }
+            isPlaying = !isPlaying;
+            updateMusicIcon();
+        }
+
+        function updateMusicIcon() {
+            const icon = document.querySelector('#music-btn iconify-icon');
+            icon.setAttribute('icon', isPlaying ? 'solar:music-note-slider-linear' : 'solar:music-note-linear');
+            icon.classList.toggle('text-rose-500', isPlaying);
+        }
+
+        // --- Floating Hearts Background ---
+        function createFloatingHearts() {
+            const container = document.getElementById('heart-container');
+            const heartCount = 15;
+
+            for (let i = 0; i < heartCount; i++) {
+                const heart = document.createElement('div');
+                heart.innerHTML = '<iconify-icon icon="solar:heart-linear"></iconify-icon>';
+                heart.className = 'floating-heart text-2xl md:text-4xl';
+                heart.style.left = Math.random() * 100 + 'vw';
+                heart.style.animationDuration = (Math.random() * 10 + 10) + 's';
+                heart.style.animationDelay = (Math.random() * 5) + 's';
+                container.appendChild(heart);
+            }
+        }
+
+        // --- Typewriter Effect ---
+        function initTypewriter() {
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        typeText();
+                        observer.disconnect();
+                    }
+                });
+            }, { threshold: 0.5 });
+            
+            observer.observe(document.querySelector('.font-hand'));
+        }
+
+        let charIndex = 0;
+        function typeText() {
+            if (charIndex < loveLetterText.length) {
+                document.getElementById('typewriter-text').innerHTML += loveLetterText.charAt(charIndex);
+                charIndex++;
+                setTimeout(typeText, 50); // Speed
+            } else {
+                document.querySelector('.typing-cursor').style.display = 'none';
+            }
+        }
+
+        // --- Modal & Surprise ---
+        function toggleModal() {
+            const modal = document.getElementById('surprise-modal');
+            modal.classList.toggle('hidden');
+        }
+
+        function acceptLove() {
+            toggleModal();
+            createExplosion();
+            document.getElementById('celebration-overlay').classList.remove('hidden');
+            setTimeout(() => {
+                document.getElementById('celebration-overlay').classList.add('hidden');
+            }, 3000);
+        }
+
+        // --- Heart Explosion Logic (Canvas-less for simplicity within single file) ---
+        function createExplosion() {
+            const colors = ['#f43f5e', '#fb7185', '#fda4af', '#fff1f2', '#fbbf24'];
+            const count = 100;
+            const center = { x: window.innerWidth / 2, y: window.innerHeight / 2 };
+
+            for (let i = 0; i < count; i++) {
+                const particle = document.createElement('div');
+                particle.classList.add('particle');
+                
+                // Random icon
+                particle.innerHTML = Math.random() > 0.5 ? '❤️' : '✨';
+                particle.style.fontSize = Math.random() * 20 + 10 + 'px';
+                particle.style.position = 'fixed';
+                particle.style.left = center.x + 'px';
+                particle.style.top = center.y + 'px';
+                particle.style.zIndex = '100';
+                
+                // Physics
+                const angle = Math.random() * Math.PI * 2;
+                const velocity = Math.random() * 300 + 100;
+                const tx = Math.cos(angle) * velocity;
+                const ty = Math.sin(angle) * velocity;
+                
+                particle.style.setProperty('--x', `${tx}px`);
+                particle.style.setProperty('--y', `${ty}px`);
+                
+                document.body.appendChild(particle);
+                
+                setTimeout(() => particle.remove(), 1000);
+            }
+        }
+
+        // --- Init ---
+        window.addEventListener('DOMContentLoaded', () => {
+            createFloatingHearts();
+        });
+
+    </script>
+
+</body>
+</html>
